@@ -1,3 +1,6 @@
+'''
+load the trained model from save and using the test data to output result
+'''
 import numpy as np
 import torch
 import torch.nn as nn
@@ -5,16 +8,18 @@ import glob
 import os
 from PIL import Image
 import rawpy
-
+# from piq import ssim, SSIMLoss
 import model
 import unit
 
 
 input_dir = './data/Sony/short/'
 gt_dir = './data/Sony/long/'
+result_dir = './result/9/'
+model_PATH = './save/weights_2999.pth'
 
-result_dir = './result/3/'
-PATH = './3/weights_1999.pth'
+# set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # get test IDs
 test_fns = glob.glob(gt_dir + '/1*.ARW')
 test_ids = [int(os.path.basename(test_fn)[0:5]) for test_fn in test_fns]
@@ -22,7 +27,7 @@ test_ids = [int(os.path.basename(test_fn)[0:5]) for test_fn in test_fns]
 
 
 model = model.Unet(4)
-model.load_state_dict(torch.load(PATH))
+model.load_state_dict(torch.load(model_PATH))
 model.eval()
 
 
@@ -64,8 +69,6 @@ for test_id in test_ids:
         gt_full = gt_full[0, :, :, :]
         scale_full = scale_full[0, :, :, :]
         scale_full = scale_full * np.mean(gt_full) / np.mean(scale_full)
-
-
         Image.fromarray((output*255).astype(np.uint8), mode = 'RGB').save(
             result_dir + 'final/%5d_00_%d_out.png' % (test_id, ratio))
         Image.fromarray((scale_full * 255).astype(np.uint8), mode = 'RGB').save(
