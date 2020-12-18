@@ -11,40 +11,8 @@ import model
 import unit
 
 
-input_dir = './data/Sony/short/'
-gt_dir = './data/Sony/long/'
-log_path = './log/result5.txt'
 
-train_fns = glob.glob(gt_dir + '0*.ARW')
-train_ids = [int(os.path.basename(train_fn)[0:5]) for train_fn in train_fns]
-
-
-
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-print(device)
-# assign memory for raw data to store
-gt_images = [None] * 6000
-input_images = {}
-input_images['300'] = [None] * len(train_ids)
-input_images['250'] = [None] * len(train_ids)
-input_images['100'] = [None] * len(train_ids)
-
-
-
-# traing
-f = open("log_path", "w")
-learning_rate = 0.0001
-model = model.Unet(4).to(device)
-model.train()
-L = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-train_model(model,optimizer,L,f)
-
-
-def train_model(model,optimizer,L,log_file, num_epochs=8000, ps = 512,):
-    
+def train_model(model,optimizer,L,log_file, num_epochs=8000, ps = 512):
     a = True
     for epoch in range(num_epochs):
         # after traing 2000 epoch chenge lr to 1e-5
@@ -125,4 +93,34 @@ def loaddata(ind,ps):
     input_patch = input_patch.permute(0,3,1,2)
     gt_patch = gt_patch.permute(0,3,1,2)
     return input_patch, gt_patch
+
+
+
+
+
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+print(device)
+# assign memory for raw data to store
+gt_images = [None] * 6000
+input_images = {}
+input_images['300'] = [None] * len(train_ids)
+input_images['250'] = [None] * len(train_ids)
+input_images['100'] = [None] * len(train_ids)
+
+
+
+# traing
+f = open("log_path", "w")
+learning_rate = 0.0001
+model = model.Unet(4).to(device)
+model.train()
+L = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+train_model(model,optimizer,L,f)
+
+
+
 
